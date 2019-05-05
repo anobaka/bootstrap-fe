@@ -2,7 +2,7 @@ import {
   cloneArr
 } from '../../../utils';
 
-export const ConstantsInitializer = function (getAllConstants, callback) {
+export const initializeConstants = function (getAllConstants, callback) {
   getAllConstants().invoke().then(t => {
     global.bizOptions = global.bizOptions || {};
     global.bizOptions.constants = t.data;
