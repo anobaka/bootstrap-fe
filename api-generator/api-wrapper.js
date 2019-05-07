@@ -3,10 +3,10 @@ import qs from 'qs';
 import {
   Message
 } from '@alifd/next';
-import serverConfig from '../serverConfig.js';
+import serverConfig from '../../src/serverConfig';
 import {
   buildLoginRedirectPath
-} from '../components/routers';
+} from '../helpers/router';
 
 export default function request(method, url, body, queryParameters, form, config, responseConverter) {
   if (url.indexOf('://') < 0) {

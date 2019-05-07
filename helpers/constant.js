@@ -3,11 +3,14 @@ import {
 } from '../../../utils';
 
 export const initializeConstants = function (getAllConstants, callback) {
-  getAllConstants().invoke().then(t => {
+  console.log(getAllConstants)
+  getAllConstants().invoke(t => {
     global.bizOptions = global.bizOptions || {};
     global.bizOptions.constants = t.data;
     console.log(`constants loaded: ${Object.keys(t.data).length}`);
-    callback && callback();
+    if (callback) {
+      callback();
+    }
   });
 };
 export const getConstantName = function (type, value) {
@@ -26,13 +29,12 @@ export const getConstantName = function (type, value) {
 };
 
 export const getConstantValueByName = function (type, name) {
-  let values = global.bizOptions.constants[type] || [];
+  const values = global.bizOptions.constants[type] || [];
   const e = values.find(t => t.label == name);
   if (e) {
     return e.value;
   }
   return null;
-
 };
 
 export const getConstants = function (type) {
@@ -41,7 +43,7 @@ export const getConstants = function (type) {
 };
 
 export const buildSelectDataSource = function (type, appendItemAll, labelForItemAll) {
-  let values = cloneArr(global.bizOptions.constants[type] || []);
+  const values = cloneArr(global.bizOptions.constants[type] || []);
   appendItemAll = appendItemAll == undefined ? true : appendItemAll;
   if (appendItemAll) {
     values.splice(0, 0, {
