@@ -1,36 +1,30 @@
 const swaggerGen = require('./swagger-vue');
 const fs = require('fs');
-// const path = require('path');
 const http = require('http');
+const path = require('path');
 // const https = require('https');
 
-// const env = process.env.ENV || 'dev';
-
-// let host = 'http://localhost:5000';
-
-// // todo: api地址内网化
-// switch (env.toLowerCase()) {
-//   case 'pro':
-//     break;
-//   default:
-//     break;
-// }
-
-// console.log(`generating sdk: ${host}/internal-doc/swagger/v1/swagger.json`);
-
-export default function generateSdk(swaggerJsonUrl, outputFile) {
+function generateSdk(swaggerJsonUrl, outputFile) {
   console.log(`generating sdk: ${swaggerJsonUrl}`);
+  const dir = outputFile.substring(0, outputFile.lastIndexOf("\\") + 1);
   const requestInvoker = http;
   requestInvoker.get(swaggerJsonUrl, (response) => {
-    response.on('finish', body => {
+    const jsonFilename = path.join(dir, './swagger.json');
+    const file = fs.createWriteStream(jsonFilename);
+    const stream = response.pipe(file);
+    stream.on('finish', () => {
+      const jsonData = require(jsonFilename);
       const opt = {
-        swagger: body,
+        swagger: jsonData,
         moduleName: 'api',
         className: 'api'
       };
       let codeResult = swaggerGen(opt);
       fs.writeFileSync(outputFile, codeResult);
       console.log(`sdk generated: ${swaggerJsonUrl}`);
+      fs.unlinkSync(jsonFilename);
     });
   });
 }
+
+module.exports = generateSdk;
