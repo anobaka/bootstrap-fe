@@ -3,7 +3,6 @@ import {
 } from '../../../utils';
 
 export const initializeConstants = function (getAllConstants, callback) {
-  console.log(getAllConstants)
   getAllConstants().invoke(t => {
     global.bizOptions = global.bizOptions || {};
     global.bizOptions.constants = t.data;
