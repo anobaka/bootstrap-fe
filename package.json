@@ -14,7 +14,9 @@
   ],
   "dependencies": {
     "@alifd/next": "^1.x",
+    "@icedesign/container": "^1.0.3",
     "@icedesign/data-binder": "^1.0.4",
+    "lodash": "^4.17.11",
     "react": "^16.4.2"
   },
   "devDependencies": {
