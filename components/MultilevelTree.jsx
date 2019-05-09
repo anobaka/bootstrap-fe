@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Dialog, Tree } from '@alifd/next';
 import IceContainer from '@icedesign/container';
+import { findItemByPos, findParentItemByPos } from '../helpers/iceworks';
 import _ from 'lodash';
 
 export default class MultilevelTree extends Component {
@@ -24,19 +25,21 @@ export default class MultilevelTree extends Component {
     // console.log(expandedKeys, extra);
     this.setState({
       expandedKeys
-    })
+    });
   }
 
   onTreeEditFinish = (key, label, node) => {
     // console.log(key, label, node);
-    const { data, parent } = node.props;
+    const { pos } = node.props;
     const { datalist } = this.state;
+    const data = findItemByPos(datalist, pos);
+    const parent = findParentItemByPos(datalist, pos);
     if (key.startsWith('new-')) {
       if (!label) {
         data.label = '双击添加';
         this.setState({
           datalist
-        })
+        });
       } else {
         this.props.create({
           model: {
@@ -47,13 +50,11 @@ export default class MultilevelTree extends Component {
           if (!t.code) {
             const newData = {
               key: t.data.id.toString(),
-              label: t.data.name,
-              parent
+              label: t.data.name
             };
             this.populateChildren(newData);
             const { expandedKeys } = this.state;
             parent.children.splice(-1, 0, newData);
-            console.log(node);
             this.setState({
               datalist,
               expandedKeys: _.union(expandedKeys, [newData.key])
@@ -61,70 +62,61 @@ export default class MultilevelTree extends Component {
           }
         });
       }
-    } else {
-      if (key == '0') {
-        data.label = this.props.resourceDisplayName;
-        this.setState({
-          datalist
-        })
-      } else {
-        if (label) {
-          this.props.update({
-            id: key,
-            model: {
-              name: label
-            }
-          }).invoke(t => {
-            if (!t.code) {
-              data.label = label;
-              this.setState({
-                datalist
-              })
-            }
-          })
-        } else {
-          this.openDeleteConfirmDialog(node);
+    } else if (key == '0') {
+      data.label = this.props.resourceDisplayName;
+      this.setState({
+        datalist
+      });
+    } else if (label) {
+      this.props.update({
+        id: key,
+        model: {
+          name: label
         }
-      }
+      }).invoke(t => {
+        if (!t.code) {
+          data.label = label;
+          this.setState({
+            datalist
+          });
+        }
+      });
+    } else {
+      this.openDeleteConfirmDialog(node);
     }
   }
 
   getNextLevelDataList = (node) => {
     // console.log(node);
-    const { data } = node.props;
+    const { pos } = node.props;
+    const { datalist } = this.state;
+    const data = findItemByPos(datalist, pos);
     return this.props.getNextLevelDataList({
       id: data.key
     }).invoke(t => {
       this.populateChildren(data, t.data);
-      const { datalist, expandedKeys } = this.state;
+      const { expandedKeys } = this.state;
       this.setState({
         datalist,
         expandedKeys: _.union(expandedKeys, [data.key])
-      })
+      });
     });
   }
 
   populateChildren = (parent, datalist) => {
     datalist = datalist || [];
     const data = datalist.map(a => {
-      const r = {
+      return {
         key: a.id.toString(),
         label: a.name,
-        parent
       };
-      r.data = r;
-      return r;
     });
     data.push({
       key: `new-${parent.key}`,
       label: '双击添加',
-      isLeaf: true,
-      parent
+      isLeaf: true
     });
     parent.children = data;
-    if (!parent.data) {
-      parent.data = parent;
-    }
     return parent;
   }
 
@@ -139,23 +131,22 @@ export default class MultilevelTree extends Component {
         datalist: [
           root
         ]
-      })
+      });
     });
   }
 
   delete = () => {
-    const { node } = this.state;
+    const { node, datalist } = this.state;
     if (node) {
-      const { data } = node.props;
+      const { pos } = node.props;
+      const data = findItemByPos(datalist, pos);
       this.props.delete({ id: data.key }).invoke(t => {
         if (!t.code) {
-          const { datalist } = this.state;
-          const { parent } = node.props;
-          console.log(node.props);
-          parent.children = parent.children.filter(t => t.key != data.key);
+          const parent = findParentItemByPos(datalist, pos);
+          parent.children = parent.children.filter(a => a.key != data.key);
           this.setState({
             datalist
-          })
+          });
           this.closeDeleteConfirmDialog();
         }
       });
@@ -202,7 +193,7 @@ export default class MultilevelTree extends Component {
             title={`正在删除${node.props.label}`}
           >
             一旦删除不可恢复，子级数据也会被一起删除，确认删除{node.props.label}吗？
-        </Dialog> : null
+          </Dialog> : null
         }
       </div>
     );

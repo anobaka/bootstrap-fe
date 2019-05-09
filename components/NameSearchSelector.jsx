@@ -21,19 +21,20 @@ export default class NameSearchSelector extends Component {
   onSearch = (name) => {
     const pageSize = this.props.pageSize || 10;
     this.props.onSearch(name, pageSize).then(list => {
-      console.log(list); 
+      // console.log(list);
       this.setState({
         dataSource: convertTreeDataResponse(list)
-      })
-    })
+      });
+    });
   }
 
   render() {
     const { dataSource } = this.state;
+    const { onSearch, pageSize, searchOnInit, showSearch, ...props } = this.props;
     return (
       <Select
         showSearch
-        {...this.props}
+        {...props}
         dataSource={dataSource}
         onSearch={this.onSearch}
       />

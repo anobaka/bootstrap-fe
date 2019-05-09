@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { CascaderSelect } from '@alifd/next';
-import { convertTreeDataResponse } from '../helpers/iceworks';
+import { convertTreeDataResponse, findItemByPos } from '../helpers/iceworks';
 
 export default class MultilevelSelector extends Component {
 
@@ -21,21 +21,24 @@ export default class MultilevelSelector extends Component {
   }
 
   getNextLevelDataList = (data) => {
-    this.props.getNextLevelDataList(data.value).then(list => {
-      const { dataSource } = this.state;
-      data._source.children = convertTreeDataResponse(list);
-      console.log(data, list);
-      this.setState({
-        dataSource
+    return new Promise(resolve => {
+      this.props.getNextLevelDataList(data.value).then(list => {
+        const { dataSource } = this.state;
+        const item = findItemByPos(dataSource, data.pos);
+        item.children = convertTreeDataResponse(list);
+        this.setState({
+          dataSource
+        }, resolve);
       });
     });
   }
 
   render() {
     const { dataSource } = this.state;
+    const { getRootDataList, getNextLevelDataList, ...props } = this.props;
     return (
       <CascaderSelect
-        {...this.props}
+        {...props}
         dataSource={dataSource}
         loadData={this.getNextLevelDataList}
       />
