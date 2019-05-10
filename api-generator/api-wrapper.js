@@ -34,7 +34,7 @@ export default function request(method, url, body, queryParameters, form, config
   options.maxRedirects = 0;
   options.withCredentials = true;
   returnObj.options = options;
-  returnObj.invoke = function (callback) {
+  returnObj.invoke = function (callback, responseHandler) {
     const promise = new Promise(resolve => {
       axios.request(options).then(res => {
         if (res.status == 200) {
@@ -53,6 +53,7 @@ export default function request(method, url, body, queryParameters, form, config
               break;
             default:
               Message.error(res.data.message);
+              resolve(res.data);
               break;
           }
         } else {

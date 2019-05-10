@@ -13,8 +13,18 @@ export default class NameSearchSelector extends Component {
   }
 
   componentDidMount() {
-    if (this.props.searchOnInit) {
-      this.onSearch();
+    const { searchOnInit, getDefaultDataSource } = this.props;
+    if (getDefaultDataSource) {
+      getDefaultDataSource().then(data => {
+        console.log(convertTreeDataResponse(data))
+        this.setState({
+          dataSource: convertTreeDataResponse(data)
+        })
+      })
+    } else {
+      if (searchOnInit) {
+        this.onSearch();
+      }
     }
   }
 
@@ -30,7 +40,7 @@ export default class NameSearchSelector extends Component {
 
   render() {
     const { dataSource } = this.state;
-    const { onSearch, pageSize, searchOnInit, showSearch, ...props } = this.props;
+    const { onSearch, pageSize, searchOnInit, showSearch, getDefaultDataSource, ...props } = this.props;
     return (
       <Select
         showSearch
