@@ -1,9 +1,7 @@
-import {
-  cloneArr
-} from '../../../utils';
+import { cloneArr } from './utils';
 
 export const initializeConstants = function (getAllConstants, callback) {
-  getAllConstants().invoke(t => {
+  getAllConstants().invoke((t) => {
     global.bizOptions = global.bizOptions || {};
     global.bizOptions.constants = t.data;
     console.log(`constants loaded: ${Object.keys(t.data).length}`);
@@ -41,13 +39,17 @@ export const getConstants = function (type) {
   return values;
 };
 
-export const buildSelectDataSource = function (type, appendItemAll, labelForItemAll) {
+export const buildSelectDataSource = function (
+  type,
+  appendItemAll,
+  labelForItemAll
+) {
   const values = cloneArr(global.bizOptions.constants[type] || []);
   appendItemAll = appendItemAll == undefined ? true : appendItemAll;
   if (appendItemAll) {
     values.splice(0, 0, {
       value: '',
-      label: labelForItemAll || '全部'
+      label: labelForItemAll || '全部',
     });
   }
   return values;
