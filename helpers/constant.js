@@ -1,10 +1,10 @@
-import { cloneArr } from './utils';
+import { cloneArr } from './object';
 
 export const initializeConstants = function (getAllConstants, callback) {
   getAllConstants().invoke((t) => {
     global.bizOptions = global.bizOptions || {};
     global.bizOptions.constants = t.data;
-    console.log(`constants loaded: ${Object.keys(t.data).length}`);
+    console.log(`constants loaded: ${Object.keys(t.data).length}`, t.data);
     if (callback) {
       callback();
     }
