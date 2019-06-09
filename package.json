@@ -17,7 +17,9 @@
     "@icedesign/container": "^1.0.3",
     "@icedesign/data-binder": "^1.0.4",
     "lodash": "^4.17.11",
-    "react": "^16.4.2"
+    "react": "^16.4.2",
+    "react-router": "^5.0.1",
+    "react-router-dom": "^5.0.1"
   },
   "devDependencies": {
     "babel-eslint": "^8.0.3",

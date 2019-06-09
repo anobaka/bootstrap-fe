@@ -2,6 +2,9 @@ import qs from 'qs';
 
 export const buildLoginRedirectPath = function (loginPath, redirectPath) {
   redirectPath = redirectPath || location.hash;
+  if (redirectPath.startsWith('#')) {
+    redirectPath = redirectPath.substring(1);
+  }
   return `${loginPath}?redirect=${encodeURI(redirectPath)}`;
 };
 

@@ -1,14 +1,19 @@
 import axios from 'axios';
 import qs from 'qs';
-import {
-  Message
-} from '@alifd/next';
+import { Message } from '@alifd/next';
 import serverConfig from '../../src/serverConfig';
-import {
-  buildLoginRedirectPath
-} from '../helpers/router';
+import appConfig from '../../src/appConfig';
+import { buildLoginRedirectPath } from '../helpers/router';
 
-export default function request(method, url, body, queryParameters, form, config, responseConverter) {
+export default function request(
+  method,
+  url,
+  body,
+  queryParameters,
+  form,
+  config,
+  responseConverter
+) {
   if (url.indexOf('://') < 0) {
     url = serverConfig.apiEndpoint + url;
   }
@@ -19,8 +24,8 @@ export default function request(method, url, body, queryParameters, form, config
     method,
     params: {
       ...queryParameters,
-      _t: (new Date()).getTime()
-    }
+      _t: new Date().getTime(),
+    },
   };
   if (body) {
     options.data = body;
@@ -35,33 +40,37 @@ export default function request(method, url, body, queryParameters, form, config
   options.withCredentials = true;
   returnObj.options = options;
   returnObj.invoke = function (callback, responseHandler) {
-    const promise = new Promise(resolve => {
-      axios.request(options).then(res => {
-        if (res.status == 200) {
-          if (responseConverter) {
-            res.data = responseConverter(res.data);
+    const promise = new Promise((resolve) => {
+      axios
+        .request(options)
+        .then((res) => {
+          if (res.status == 200) {
+            if (responseConverter) {
+              res.data = responseConverter(res.data);
+            }
+            switch (res.data.code) {
+              case 401:
+                const loginPath = appConfig.getLoginPath();
+                // 只允许一次请求跳转到session
+                if (location.hash.indexOf(loginPath) < 0) {
+                  location.hash = buildLoginRedirectPath(loginPath);
+                }
+                break;
+              case 0:
+                resolve(res.data);
+                break;
+              default:
+                Message.error(res.data.message);
+                resolve(res.data);
+                break;
+            }
+          } else {
+            Message.error('请求异常，请稍后再试');
           }
-          switch (res.data.code) {
-            case 401:
-              // 只允许一次请求跳转到session
-              if (location.hash.indexOf('#/session') < 0) {
-                location.hash = buildLoginRedirectPath();
-              }
-              break;
-            case 0:
-              resolve(res.data);
-              break;
-            default:
-              Message.error(res.data.message);
-              resolve(res.data);
-              break;
-          }
-        } else {
-          Message.error('请求异常，请稍后再试');
-        }
-      }).catch(error => {
-        Message.error(`请求异常，请稍后再试。${error}`);
-      });
+        })
+        .catch((error) => {
+          Message.error(`请求异常，请稍后再试。${error}`);
+        });
     });
     if (callback) {
       return promise.then(callback);
