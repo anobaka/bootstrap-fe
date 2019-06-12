@@ -14,6 +14,9 @@ export default function request(
   config,
   responseConverter
 ) {
+  if (serverConfig.beforeRequesting) {
+    serverConfig.beforeRequesting(method, url, body, queryParameters, form, config, responseConverter);
+  }
   if (url.indexOf('://') < 0) {
     url = serverConfig.apiEndpoint + url;
   }
