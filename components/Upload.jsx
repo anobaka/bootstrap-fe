@@ -80,7 +80,7 @@ export default class Upload extends Component {
     const RealComponent = iceComponent || IceUpload.Card;
 
     return (
-      <RealComponent {...mergedProps} />
+      <RealComponent {...mergedProps}>点击上传</RealComponent>
     );
   }
 }
