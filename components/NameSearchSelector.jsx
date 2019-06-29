@@ -40,6 +40,7 @@ export default class NameSearchSelector extends Component {
 
   render() {
     const { dataSource } = this.state;
+    console.log(this.props);
     const { onSearch, pageSize, searchOnInit, showSearch, getDefaultDataSource, ...props } = this.props;
     return (
       <Select
