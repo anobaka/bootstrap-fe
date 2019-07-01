@@ -28,6 +28,20 @@ export default class NameSearchSelector extends Component {
     }
   }
 
+  //todo: optimize
+  componentWillReceiveProps(newProps) {
+    if (!(this.props.value > 0) && newProps.value > 0) {
+      if (newProps.getDefaultDataSource) {
+        newProps.getDefaultDataSource().then(data => {
+          console.log(convertTreeDataResponse(data))
+          this.setState({
+            dataSource: convertTreeDataResponse(data)
+          })
+        })
+      }
+    }
+  }
+
   onSearch = (name) => {
     const pageSize = this.props.pageSize || 10;
     this.props.onSearch(name, pageSize).then(list => {

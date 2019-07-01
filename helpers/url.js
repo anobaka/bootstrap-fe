@@ -1,6 +1,8 @@
 export const appendQueryParameter = (url, key, value, needEscape = true) => {
   if (url.indexOf('?') === -1) {
     url += '?';
+  } else {
+    url += '&';
   }
   if (needEscape) {
     url += `${encodeURI(key)}=${encodeURI(value)}`;
