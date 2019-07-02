@@ -35,8 +35,8 @@ function SimpleDataBinder(dataKey, axoisOptions) {
           currentPage: res.pageIndex,
           pageSize: res.pageSize,
           total: res.totalCount,
-          data: res.data,
-          list: res.data,
+          data: res.data || [],
+          list: res.data || [],
           code: res.code,
         },
       };
