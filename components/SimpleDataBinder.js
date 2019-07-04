@@ -40,7 +40,7 @@ function SimpleDataBinder(dataKey, axoisOptions) {
           code: res.code,
         },
       };
-      console.log(newRes);
+      // console.log(newRes);
       // 回传给处理函数
       // 不做回传处理会导致数据更新逻辑中断
       responseHandler(newRes, originResponse);

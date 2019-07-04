@@ -34,6 +34,7 @@ export default class MultilevelTree extends Component {
     const { datalist } = this.state;
     const data = findItemByPos(datalist, pos);
     const parent = findParentItemByPos(datalist, pos);
+    console.log(label)
     if (key.startsWith('new-')) {
       if (!label) {
         data.label = '双击添加';
@@ -41,26 +42,28 @@ export default class MultilevelTree extends Component {
           datalist
         });
       } else {
-        this.props.create({
-          model: {
-            parentId: parent.key > 0 ? parent.key : null,
-            name: label
-          }
-        }).invoke(t => {
-          if (!t.code) {
-            const newData = {
-              key: t.data.id.toString(),
-              label: t.data.name
-            };
-            this.populateChildren(newData);
-            const { expandedKeys } = this.state;
-            parent.children.splice(-1, 0, newData);
-            this.setState({
-              datalist,
-              expandedKeys: _.union(expandedKeys, [newData.key])
-            });
-          }
-        });
+        if (label != '双击添加') {
+          this.props.create({
+            model: {
+              parentId: parent.key > 0 ? parent.key : null,
+              name: label
+            }
+          }).invoke(t => {
+            if (!t.code) {
+              const newData = {
+                key: t.data.id.toString(),
+                label: t.data.name
+              };
+              this.populateChildren(newData);
+              const { expandedKeys } = this.state;
+              parent.children.splice(-1, 0, newData);
+              this.setState({
+                datalist,
+                expandedKeys: _.union(expandedKeys, [newData.key])
+              });
+            }
+          });
+        }
       }
     } else if (key == '0') {
       data.label = this.props.resourceDisplayName;
