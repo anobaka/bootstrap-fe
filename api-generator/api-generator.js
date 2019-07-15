@@ -7,7 +7,7 @@ const path = require('path');
 function generateSdk(swaggerJsonUrl, outputFile) {
   console.log(`generating sdk: ${swaggerJsonUrl}`);
   console.log(`outputFile: ${outputFile}`);
-  const dir = outputFile.substring(0, outputFile.lastIndexOf("\\") + 1);
+  const dir = outputFile.substring(0, outputFile.lastIndexOf(path.sep) + 1);
   console.log(`dir: ${dir}`)
   const requestInvoker = http;
   requestInvoker.get(swaggerJsonUrl, (response) => {
