@@ -6,16 +6,16 @@ const path = require('path');
 
 function generateSdk(swaggerJsonUrl, outputFile) {
   console.log(`generating sdk: ${swaggerJsonUrl}`);
-  console.log(`outputFile: ${outputFile}`);
+  // console.log(`outputFile: ${outputFile}`);
   const dir = outputFile.substring(0, outputFile.lastIndexOf(path.sep) + 1);
-  console.log(`dir: ${dir}`)
+  // console.log(`dir: ${dir}`)
   const requestInvoker = http;
   requestInvoker.get(swaggerJsonUrl, (response) => {
     const jsonFilename = path.join(dir, './swagger.json');
     const file = fs.createWriteStream(jsonFilename);
     const stream = response.pipe(file);
     stream.on('finish', () => {
-      console.log(`jsonFilename: ${jsonFilename}`)
+      // console.log(`jsonFilename: ${jsonFilename}`)
       const jsonData = require(jsonFilename);
       const opt = {
         swagger: jsonData,
