@@ -1,31 +1,39 @@
-const swaggerGen = require('./swagger-vue');
-const fs = require('fs');
-const http = require('http');
-const path = require('path');
+const swaggerGen = require("./swagger-gen");
+const fs = require("fs");
+const http = require("http");
+const path = require("path");
 // const https = require('https');
 
-function generateSdk(swaggerJsonUrl, outputFile) {
-  console.log(`generating sdk: ${swaggerJsonUrl}`);
+function generateSdk(swaggerJsonUrl, outputDir) {
+  console.log(`Generating SDK: ${swaggerJsonUrl}`);
   // console.log(`outputFile: ${outputFile}`);
-  const dir = outputFile.substring(0, outputFile.lastIndexOf(path.sep) + 1);
+  // const dir = outputFile.substring(0, outputFile.lastIndexOf(path.sep) + 1);
   // console.log(`dir: ${dir}`)
   const requestInvoker = http;
-  requestInvoker.get(swaggerJsonUrl, (response) => {
-    const jsonFilename = path.join(dir, './swagger.json');
+  requestInvoker.get(swaggerJsonUrl, response => {
+    const jsonFilename = path.join(outputDir, "./swagger.json");
     const file = fs.createWriteStream(jsonFilename);
     const stream = response.pipe(file);
-    stream.on('finish', () => {
+    stream.on("finish", () => {
       // console.log(`jsonFilename: ${jsonFilename}`)
       const jsonData = require(jsonFilename);
       const opt = {
         swagger: jsonData,
-        moduleName: 'api',
-        className: 'api'
+        moduleName: "api",
+        className: "api"
       };
-      let codeResult = swaggerGen(opt);
-      fs.writeFileSync(outputFile, codeResult);
-      console.log(`sdk generated: ${swaggerJsonUrl}`);
+      let outputs = swaggerGen(opt);
+      Object.keys(outputs).map(f => {
+        const o = outputs[f];
+        const { override, data } = o;
+        const filename = path.join(outputDir, f + ".js");
+        if (override || !fs.existsSync(filename)) {
+          fs.writeFileSync(filename, data);
+          console.log(`File generated: ${filename}`);
+        }
+      });
       fs.unlinkSync(jsonFilename);
+      console.log(`SDK generated: ${swaggerJsonUrl}`);
     });
   });
 }

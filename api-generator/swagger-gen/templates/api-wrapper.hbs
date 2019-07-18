@@ -1,9 +1,9 @@
 import axios from 'axios';
 import qs from 'qs';
 import { Message } from '@alifd/next';
-import serverConfig from '../../src/serverConfig';
-import appConfig from '../../src/appConfig';
-import { buildLoginRedirectPath } from '../helpers/router';
+import { buildLoginRedirectPath } from '@anobaka/bootstrap-fe/helpers/router';
+import serverConfig from '../serverConfig';
+import appConfig from '../appConfig';
 
 export default function request(
   method,
