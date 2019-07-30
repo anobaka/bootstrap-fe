@@ -13,7 +13,7 @@
     ".eslintrc"
   ],
   "dependencies": {
-    "@alifd/next": "^1.x",
+    "@alifd/next": "^1.16.4",
     "@icedesign/container": "^1.0.4",
     "@icedesign/data-binder": "^1.0.5",
     "lodash": "^4.17.15",
