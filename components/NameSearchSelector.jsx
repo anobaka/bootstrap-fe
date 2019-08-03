@@ -1,15 +1,14 @@
-import React, { Component } from 'react';
-import { Select } from '@alifd/next';
-import { convertTreeDataResponse } from '../helpers/iceworks';
+import React, { Component } from "react";
+import { Select } from "@alifd/next";
+import { convertTreeDataResponse } from "../helpers/iceworks";
 
 export default class NameSearchSelector extends Component {
-
   constructor(props) {
     super(props);
 
     this.state = {
       dataSource: []
-    }
+    };
   }
 
   componentDidMount() {
@@ -19,8 +18,8 @@ export default class NameSearchSelector extends Component {
         // console.log(convertTreeDataResponse(data))
         this.setState({
           dataSource: convertTreeDataResponse(data)
-        })
-      })
+        });
+      });
     } else {
       if (searchOnInit) {
         this.onSearch();
@@ -30,20 +29,25 @@ export default class NameSearchSelector extends Component {
 
   //todo: optimize
   componentWillReceiveProps(newProps) {
-    if (!(this.props.value > 0) && newProps.value > 0) {
+    const { dataSource } = this.state;
+    if (
+      !(this.props.value > 0) &&
+      newProps.value > 0 &&
+      !dataSource.some(t => t.value == newProps.value)
+    ) {
       if (newProps.getDefaultDataSource) {
         // console.log(1);
         newProps.getDefaultDataSource().then(data => {
           // console.log(convertTreeDataResponse(data))
           this.setState({
             dataSource: convertTreeDataResponse(data)
-          })
-        })
+          });
+        });
       }
     }
   }
 
-  onSearch = (name) => {
+  onSearch = name => {
     const pageSize = this.props.pageSize || 10;
     this.props.onSearch(name, pageSize).then(list => {
       // console.log(list);
@@ -51,12 +55,19 @@ export default class NameSearchSelector extends Component {
         dataSource: convertTreeDataResponse(list)
       });
     });
-  }
+  };
 
   render() {
     const { dataSource } = this.state;
     // console.log(this.props);
-    const { onSearch, pageSize, searchOnInit, showSearch, getDefaultDataSource, ...props } = this.props;
+    const {
+      onSearch,
+      pageSize,
+      searchOnInit,
+      showSearch,
+      getDefaultDataSource,
+      ...props
+    } = this.props;
     return (
       <Select
         showSearch
