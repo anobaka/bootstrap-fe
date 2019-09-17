@@ -56,14 +56,7 @@ export default class Upload extends Component {
   render() {
     const { limit, value, onChange, action, accept, iceComponent, ...props } = this.props;
 
-    let iceValue;
-    if (limit == 1) {
-      iceValue = (value && [value]) || [];
-    } else {
-      iceValue = value || [];
-    }
-
-    iceValue = iceValue.map(url => this.buildIceValue(url));
+    const iceValue = (Array.isArray(value) ? value : (value && [value]) || []).map(url => this.buildIceValue(url));
 
     const mergedProps = {
       action,
