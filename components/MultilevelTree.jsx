@@ -182,10 +182,11 @@ export default class MultilevelTree extends Component {
       deleteConfirmDialogVisible,
       node
     } = this.state;
-    const { resourceDisplayName } = this.props;
+    const { resourceDisplayName, getRootDataList, getNextLevelDataList, update, create, getInitDataSource, ...props } = this.props;
+    delete props.delete;
 
     // console.log(this.state)
-
+    
     return (
       <div className="filter-table">
         <IceContainer title={`${resourceDisplayName}管理`}>
@@ -197,6 +198,7 @@ export default class MultilevelTree extends Component {
             expandedKeys={expandedKeys}
             onExpand={this.onTreeExpand}
             onEditFinish={this.onTreeEditFinish}
+            {...props}
           />
         </IceContainer>
         {node ? (
