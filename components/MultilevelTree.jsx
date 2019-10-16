@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import { Dialog, Tree } from "@alifd/next";
+import { Dialog, Tree, Button } from "@alifd/next";
+import { Form, Field } from "@ice/form";
 import IceContainer from "@icedesign/container";
 import _ from "lodash";
 
@@ -29,21 +30,36 @@ export default class MultilevelTree extends Component {
     });
   };
 
+  getDefaultLabel = () => {
+    return this.props.defaultLabel || "双击添加";
+  };
+
+  renderLabel = data => {
+    return this.props.renderLabel && this.props.renderLabel(data) || data.name;
+  };
+
+  getMode = () => {
+    return this.props.editable
+      ? "editable"
+      : this.props.selectable
+      ? "selectable"
+      : undefined;
+  };
+
   onTreeEditFinish = (key, label, node) => {
     // console.log(key, label, node);
     const { pos } = node.props;
     const { datalist } = this.state;
     const data = findItemByPos(datalist, pos);
     const parent = findParentItemByPos(datalist, pos);
-    console.log(label);
     if (key.startsWith("new-")) {
       if (!label) {
-        data.label = "双击添加";
+        data.label = this.getDefaultLabel();
         this.setState({
           datalist
         });
       } else {
-        if (label != "双击添加") {
+        if (label != this.getDefaultLabel()) {
           this.props
             .create({
               model: {
@@ -55,7 +71,7 @@ export default class MultilevelTree extends Component {
               if (!t.code) {
                 const newData = {
                   key: t.data.id.toString(),
-                  label: t.data.name
+                  label: this.renderLabel(t.data)
                 };
                 this.populateChildren(newData);
                 const { expandedKeys } = this.state;
@@ -118,12 +134,13 @@ export default class MultilevelTree extends Component {
     const data = datalist.map(a => {
       return {
         key: a.id.toString(),
-        label: a.name
+        label: this.renderLabel(a),
+        data: a
       };
     });
     data.push({
       key: `new-${parent.key}`,
-      label: "双击添加",
+      label: this.getDefaultLabel(),
       isLeaf: true
     });
     parent.children = data;
@@ -169,10 +186,99 @@ export default class MultilevelTree extends Component {
   };
 
   closeDeleteConfirmDialog = () => {
+    this.dialog && this.dialog.hide();
     this.setState({
       deleteConfirmDialogVisible: false,
       node: null
     });
+  };
+
+  dialog;
+
+  onSelect = (selectedKeys, extra) => {
+    const { node } = extra;
+    const { pos } = node.props;
+    const { datalist } = this.state;
+    const n = findItemByPos(datalist, pos);
+    // console.log(n);
+    this.dialog = Dialog.show({
+      title: `${this.props.resourceDisplayName}详情`,
+      content: (
+        <Form onSubmit={v => this.submitForm(v, node)} initialValues={n.data}>
+          {formCore => {
+            this.formCoreSubmit = formCore.submit.bind(formCore);
+            return <div>{this.props.renderFormFields(formCore)}</div>;
+          }}
+        </Form>
+      ),
+      style: {
+        width: 1000
+      },
+      closeable: true,
+      footer: (
+        <div>
+          <Button type="primary" onClick={() => this.formCoreSubmit()}>
+            确定
+          </Button>
+          <Button
+            type="primary"
+            style={{ marginLeft: 5 }}
+            warning
+            onClick={() => this.openDeleteConfirmDialog(node)}
+          >
+            删除
+          </Button>
+        </div>
+      )
+    });
+    console.log(this.dialog)
+  };
+
+  formCoreSubmit;
+
+  submitForm = (data, node) => {
+    const { pos } = node.props;
+    const { datalist } = this.state;
+    const n = findItemByPos(datalist, pos);
+    const parent = findParentItemByPos(datalist, pos);
+    const { key } = n;
+    if (key.startsWith("new-")) {
+      this.props.create({
+        model: {
+          ...data,
+          parentId: parent.key > 0 ? parent.key : null,
+        }
+      }).invoke(t => {
+        this.dialog.hide();
+        if (!t.code) {
+          const newData = {
+            key: t.data.id.toString(),
+            label: this.renderLabel(t.data),
+            data: t.data
+          };
+          this.populateChildren(newData);
+          const { expandedKeys } = this.state;
+          parent.children.splice(-1, 0, newData);
+          this.setState({
+            datalist,
+            expandedKeys: _.union(expandedKeys, [newData.key])
+          });
+        }
+      });
+    } else {
+      this.props.update({
+        id: data.id,
+        model: data
+      }).invoke(t => {
+        this.dialog.hide();
+        if (!t.code) {
+          n.label = this.renderLabel(data);
+          this.setState({
+            datalist
+          });
+        }
+      });
+    }
   };
 
   render() {
@@ -182,11 +288,27 @@ export default class MultilevelTree extends Component {
       deleteConfirmDialogVisible,
       node
     } = this.state;
-    const { resourceDisplayName, getRootDataList, getNextLevelDataList, update, create, getInitDataSource, ...props } = this.props;
+    const {
+      resourceDisplayName,
+      getRootDataList,
+      getNextLevelDataList,
+      update,
+      create,
+      getInitDataSource,
+      renderLabel,
+      defaultLabel,
+      ...props
+    } = this.props;
     delete props.delete;
 
+    // compatible with previous versions.
+    const editable = this.props.editable == false ? false : true;
+    const selectable = editable ? false : this.props.selectable;
+    const onSelect = selectable ? this.onSelect : undefined;
+    const multiple = !selectable;
+
     // console.log(this.state)
-    
+
     return (
       <div className="filter-table">
         <IceContainer title={`${resourceDisplayName}管理`}>
@@ -194,10 +316,13 @@ export default class MultilevelTree extends Component {
             dataSource={datalist}
             loadData={this.getNextLevelDataList}
             showLine
-            editable
+            editable={editable}
             expandedKeys={expandedKeys}
             onExpand={this.onTreeExpand}
             onEditFinish={this.onTreeEditFinish}
+            onSelect={onSelect}
+            multiple={multiple}
+            selectable={selectable}
             {...props}
           />
         </IceContainer>
