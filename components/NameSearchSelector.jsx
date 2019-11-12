@@ -11,13 +11,15 @@ export default class NameSearchSelector extends Component {
     };
   }
 
+  convertTreeDataResponse = (v) => (this.props.convertTreeDataResponse || convertTreeDataResponse)(v);
+
   componentDidMount() {
     const { searchOnInit, getDefaultDataSource } = this.props;
     if (getDefaultDataSource) {
       getDefaultDataSource().then(data => {
         // console.log(convertTreeDataResponse(data))
         this.setState({
-          dataSource: convertTreeDataResponse(data)
+          dataSource: this.convertTreeDataResponse(data)
         });
       });
     } else {
@@ -40,7 +42,7 @@ export default class NameSearchSelector extends Component {
         newProps.getDefaultDataSource().then(data => {
           // console.log(convertTreeDataResponse(data))
           this.setState({
-            dataSource: convertTreeDataResponse(data)
+            dataSource: this.convertTreeDataResponse(data)
           });
         });
       }
@@ -52,7 +54,7 @@ export default class NameSearchSelector extends Component {
     this.props.onSearch(name, pageSize).then(list => {
       // console.log(list);
       this.setState({
-        dataSource: convertTreeDataResponse(list)
+        dataSource: this.convertTreeDataResponse(list)
       });
     });
   };

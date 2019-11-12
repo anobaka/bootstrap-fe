@@ -1,6 +1,6 @@
-import React, { Component } from 'react';
-import { Upload as IceUpload } from '@alifd/next';
-import path from 'path';
+import React, { Component } from "react";
+import { Upload as IceUpload } from "@alifd/next";
+import path from "path";
 
 export default class Upload extends Component {
   constructor(props) {
@@ -8,8 +8,8 @@ export default class Upload extends Component {
     this.state = {};
   }
 
-  buildIceValue = (url) => {
-    const questionMarkIndex = url.lastIndexOf('?');
+  buildIceValue = url => {
+    const questionMarkIndex = url.lastIndexOf("?");
     if (questionMarkIndex > -1) {
       url = url.substring(0, questionMarkIndex);
     }
@@ -17,18 +17,18 @@ export default class Upload extends Component {
     return {
       name: filename,
       fileName: filename,
-      state: 'done',
+      state: "done",
       downloadURL: url,
       fileURL: url,
       imgURL: url,
-      url,
+      url
     };
   };
 
-  uploadFormatter = (rsp) => {
+  uploadFormatter = rsp => {
     const formattedRsp = {
       success: rsp.code == 0,
-      ...this.buildIceValue(rsp.data),
+      ...(rsp.code == 0 ? this.buildIceValue(rsp.data) : {})
     };
     return formattedRsp;
   };
@@ -38,10 +38,10 @@ export default class Upload extends Component {
     }
   }
 
-  onChange = (fileList) => {
+  onChange = fileList => {
     const { onChange, limit } = this.props;
     const validUrls =
-      fileList && fileList.filter(t => t.state == 'done').map(a => a.url);
+      fileList && fileList.filter(t => t.state == "done").map(a => a.url);
     if (onChange) {
       if (validUrls && validUrls.length > 0) {
         if (limit == 1) {
@@ -54,9 +54,22 @@ export default class Upload extends Component {
   };
 
   render() {
-    const { limit, value, onChange, action, accept, iceComponent, ...props } = this.props;
+    const {
+      limit,
+      value,
+      onChange,
+      action,
+      accept,
+      IceComponent,
+      name,
+      listType,
+      ...props
+    } = this.props;
 
-    const iceValue = (Array.isArray(value) ? value : (value && [value]) || []).map(url => this.buildIceValue(url));
+    const iceValue = (Array.isArray(value)
+      ? value
+      : (value && [value]) || []
+    ).map(url => this.buildIceValue(url));
 
     const mergedProps = {
       action,
@@ -65,15 +78,19 @@ export default class Upload extends Component {
       formatter: this.uploadFormatter,
       value: iceValue,
       useDataURL: true,
-      listType: 'card',
-      accept: accept && 'image/png, image/jpg, image/jpeg, image/gif, image/bmp',
+      listType: listType || "card",
+      accept:
+        accept || "image/png, image/jpg, image/jpeg, image/gif, image/bmp",
+      name: "file",
       ...props
-    }
+    };
 
-    const RealComponent = iceComponent || IceUpload.Card;
+    const RealComponent = IceComponent || IceUpload.Card;
 
     return (
-      <RealComponent {...mergedProps}>点击上传</RealComponent>
+      <RealComponent {...mergedProps}>
+        {this.props.children || "点击上传"}
+      </RealComponent>
     );
   }
 }
