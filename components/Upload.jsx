@@ -89,7 +89,7 @@ export default class Upload extends Component {
 
     return (
       <RealComponent {...mergedProps}>
-        {this.props.children || "点击上传"}
+        {this.props.children || <div>点击上传</div>}
       </RealComponent>
     );
   }
