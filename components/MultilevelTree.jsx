@@ -1,10 +1,16 @@
 import React, { Component } from "react";
-import { Dialog, Tree, Button } from "@alifd/next";
-import { Form, Field } from "@ice/form";
+import { Dialog, Tree, Button, Grid } from "@alifd/next";
+import {
+  FormBinderWrapper as IceFormBinderWrapper,
+  FormBinder as IceFormBinder,
+  FormError as IceFormError
+} from "@icedesign/form-binder";
 import IceContainer from "@icedesign/container";
 import _ from "lodash";
 
 import { findItemByPos, findParentItemByPos } from "../helpers/iceworks";
+
+const { Row, Col } = Grid;
 
 export default class MultilevelTree extends Component {
   static displayName = "MultilevelTree";
@@ -19,7 +25,9 @@ export default class MultilevelTree extends Component {
     this.state = {
       deleteConfirmDialogVisible: false,
       datalist: [],
-      expandedKeys: ["0"]
+      expandedKeys: ["0"],
+      // current item
+      data: {}
     };
   }
 
@@ -35,7 +43,9 @@ export default class MultilevelTree extends Component {
   };
 
   renderLabel = data => {
-    return this.props.renderLabel && this.props.renderLabel(data) || data.name;
+    return (
+      (this.props.renderLabel && this.props.renderLabel(data)) || data.name
+    );
   };
 
   getMode = () => {
@@ -200,84 +210,111 @@ export default class MultilevelTree extends Component {
     const { pos } = node.props;
     const { datalist } = this.state;
     const n = findItemByPos(datalist, pos);
-    // console.log(n);
-    this.dialog = Dialog.show({
-      title: `${this.props.resourceDisplayName}详情`,
-      content: (
-        <Form onSubmit={v => this.submitForm(v, node)} initialValues={n.data}>
-          {formCore => {
-            this.formCoreSubmit = formCore.submit.bind(formCore);
-            return <div>{this.props.renderFormFields(formCore)}</div>;
-          }}
-        </Form>
-      ),
-      style: {
-        width: 1000
+    this.setState(
+      {
+        data: n.data
       },
-      closeable: true,
-      footer: (
-        <div>
-          <Button type="primary" onClick={() => this.formCoreSubmit()}>
-            确定
-          </Button>
-          <Button
-            type="primary"
-            style={{ marginLeft: 5 }}
-            warning
-            onClick={() => this.openDeleteConfirmDialog(node)}
-          >
-            删除
-          </Button>
-        </div>
-      )
-    });
-    console.log(this.dialog)
+      () => {
+        // console.log(n);
+        this.dialog = Dialog.show({
+          title: `${this.props.resourceDisplayName}详情`,
+          content: (
+            <IceFormBinderWrapper value={this.state.data}>
+              <div>
+                {this.props.formFields.map(t => (
+                  <Row style={styles.formItem}>
+                    <Col span="4" style={styles.label}>
+                      {t.label}：
+                    </Col>
+                    <Col span="16">
+                      <IceFormBinder
+                        name={t.name}
+                        {...(t.formBinderProps || {})}
+                      >
+                        <t.Component
+                          style={{ width: "100%" }}
+                          {...t.componentProps}
+                        />
+                      </IceFormBinder>
+                    </Col>
+                  </Row>
+                ))}
+              </div>
+            </IceFormBinderWrapper>
+          ),
+          style: {
+            minWidth: 800
+          },
+          closeable: true,
+          footer: (
+            <div>
+              <Button type="primary" onClick={() => this.submitForm(node)}>
+                确定
+              </Button>
+              <Button
+                type="primary"
+                style={{ marginLeft: 5 }}
+                warning
+                onClick={() => this.openDeleteConfirmDialog(node)}
+              >
+                删除
+              </Button>
+            </div>
+          )
+        });
+        // console.log(this.dialog)
+      }
+    );
   };
 
   formCoreSubmit;
 
-  submitForm = (data, node) => {
+  submitForm = node => {
     const { pos } = node.props;
-    const { datalist } = this.state;
+    const { datalist, data } = this.state;
     const n = findItemByPos(datalist, pos);
     const parent = findParentItemByPos(datalist, pos);
     const { key } = n;
     if (key.startsWith("new-")) {
-      this.props.create({
-        model: {
-          ...data,
-          parentId: parent.key > 0 ? parent.key : null,
-        }
-      }).invoke(t => {
-        this.dialog.hide();
-        if (!t.code) {
-          const newData = {
-            key: t.data.id.toString(),
-            label: this.renderLabel(t.data),
-            data: t.data
-          };
-          this.populateChildren(newData);
-          const { expandedKeys } = this.state;
-          parent.children.splice(-1, 0, newData);
-          this.setState({
-            datalist,
-            expandedKeys: _.union(expandedKeys, [newData.key])
-          });
-        }
-      });
+      this.props
+        .create({
+          model: {
+            ...data,
+            parentId: parent.key > 0 ? parent.key : null
+          }
+        })
+        .invoke(t => {
+          this.dialog.hide();
+          if (!t.code) {
+            const newData = {
+              key: t.data.id.toString(),
+              label: this.renderLabel(t.data),
+              data: t.data
+            };
+            this.populateChildren(newData);
+            const { expandedKeys } = this.state;
+            parent.children.splice(-1, 0, newData);
+            this.setState({
+              datalist,
+              expandedKeys: _.union(expandedKeys, [newData.key])
+            });
+          }
+        });
     } else {
-      this.props.update({
-        id: data.id,
-        model: data
-      }).invoke(t => {
-        this.dialog.hide();
-        if (!t.code) {
-          n.label = this.renderLabel(data);
-          this.setState({
-            datalist
-          });
-        }
-      });
+      this.props
+        .update({
+          id: data.id,
+          model: data
+        })
+        .invoke(t => {
+          this.dialog.hide();
+          if (!t.code) {
+            n.label = this.renderLabel(data);
+            this.setState({
+              datalist
+            });
+          }
+        });
     }
   };
 
@@ -343,3 +380,14 @@ export default class MultilevelTree extends Component {
     );
   }
 }
+
+const styles = {
+  label: {
+    textAlign: "right",
+    marginRight: "10px"
+  },
+  formItem: {
+    alignItems: "center",
+    marginBottom: 25
+  }
+};
