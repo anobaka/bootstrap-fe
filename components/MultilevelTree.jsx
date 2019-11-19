@@ -31,7 +31,7 @@ export default class MultilevelTree extends Component {
     };
   }
 
-  onTreeExpand = expandedKeys => {
+  onTreeExpand = (expandedKeys, extra) => {
     // console.log(expandedKeys, extra);
     this.setState({
       expandedKeys
@@ -125,28 +125,38 @@ export default class MultilevelTree extends Component {
     const { pos } = node.props;
     const { datalist } = this.state;
     const data = findItemByPos(datalist, pos);
-    return this.props
-      .getNextLevelDataList({
-        id: data.key
-      })
-      .invoke(t => {
-        this.populateChildren(data, t.data);
-        const { expandedKeys } = this.state;
-        this.setState({
-          datalist,
-          expandedKeys: _.union(expandedKeys, [data.key])
-        });
-      });
+    return new Promise((resolve, reject) => {
+      if (!data.isLeaf && (!data.children || data.children.length < 2)) {
+        this.props
+          .getNextLevelDataList({
+            id: data.key
+          })
+          .invoke(t => {
+            resolve();
+            this.populateChildren(data, t.data);
+            const { expandedKeys } = this.state;
+            this.setState({
+              datalist,
+              expandedKeys: _.union(expandedKeys, [data.key])
+            });
+          });
+      } else {
+        resolve();
+      }
+    });
   };
 
   populateChildren = (parent, datalist) => {
     datalist = datalist || [];
     const data = datalist.map(a => {
-      return {
+      var d = {
         key: a.id.toString(),
         label: this.renderLabel(a),
+        isLeaf: a.isLeaf,
         data: a
       };
+      this.populateChildren(d, a.children);
+      return d;
     });
     data.push({
       key: `new-${parent.key}`,
@@ -164,11 +174,30 @@ export default class MultilevelTree extends Component {
         key: "0"
       };
       this.populateChildren(root, t.data);
+      let { expandedKeys } = this.state;
+      const keys = this.getAllLoadedDataKeys([root]);
+      expandedKeys = _.union(expandedKeys, keys);
+      // console.log(keys, expandedKeys);
       this.setState({
-        datalist: [root]
+        datalist: [root],
+        expandedKeys
       });
     });
   }
+
+  getAllLoadedDataKeys = (list, keys) => {
+    keys = _.union(
+      keys || [],
+      list.filter(t => t.children && t.children.length > 1).map(t => t.key)
+    );
+    // console.log(keys, list);
+    list.forEach(t => {
+      if (t.children && t.children.length) {
+        keys = _.union(keys, this.getAllLoadedDataKeys(t.children, keys));
+      }
+    });
+    return keys;
+  };
 
   delete = () => {
     const { node, datalist } = this.state;
@@ -334,6 +363,7 @@ export default class MultilevelTree extends Component {
       getInitDataSource,
       renderLabel,
       defaultLabel,
+      defaultExpandAll,
       ...props
     } = this.props;
     delete props.delete;
