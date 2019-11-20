@@ -33,6 +33,14 @@ export default class MultilevelTree extends Component {
 
   onTreeExpand = (expandedKeys, extra) => {
     // console.log(expandedKeys, extra);
+    // todo: Sometimes extra.node is not a TreeNode!!!
+    const node = extra.node.node || extra.node;
+    const { pos } = node.props;
+    const { datalist } = this.state;
+    const data = findItemByPos(datalist, pos);
+    const keys = this.getAllLoadedDataKeys(data.children);
+    expandedKeys = _.difference(expandedKeys, keys);
+    // console.log(data, keys, expandedKeys);
     this.setState({
       expandedKeys
     });
@@ -121,6 +129,8 @@ export default class MultilevelTree extends Component {
   };
 
   getNextLevelDataList = node => {
+    // todo: Sometimes node is not a TreeNode!!!
+    node = node.node || node;
     // console.log(node);
     const { pos } = node.props;
     const { datalist } = this.state;
@@ -186,6 +196,7 @@ export default class MultilevelTree extends Component {
   }
 
   getAllLoadedDataKeys = (list, keys) => {
+    list = list || [];
     keys = _.union(
       keys || [],
       list.filter(t => t.children && t.children.length > 1).map(t => t.key)

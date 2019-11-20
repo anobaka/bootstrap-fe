@@ -4,6 +4,7 @@ export function convertTreeDataResponse(list) {
     treeData = [];
     list.map(t => {
       const data = {
+        ...t,
         value: t.id.toString(),
         label: t.name,
         isLeaf: t.isLeaf
