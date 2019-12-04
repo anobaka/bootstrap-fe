@@ -117,7 +117,8 @@ export default class MultilevelTree extends Component {
         })
         .invoke(t => {
           if (!t.code) {
-            data.label = label;
+            data.data.name = label;
+            data.label = this.renderLabel(data.data);
             this.setState({
               datalist
             });
