@@ -11,7 +11,8 @@ export default class NameSearchSelector extends Component {
     };
   }
 
-  convertTreeDataResponse = (v) => (this.props.convertTreeDataResponse || convertTreeDataResponse)(v);
+  convertTreeDataResponse = v =>
+    (this.props.convertTreeDataResponse || convertTreeDataResponse)(v);
 
   componentDidMount() {
     const { searchOnInit, getDefaultDataSource } = this.props;
@@ -51,12 +52,14 @@ export default class NameSearchSelector extends Component {
 
   onSearch = name => {
     const pageSize = this.props.pageSize || 10;
-    this.props.onSearch(name, pageSize).then(list => {
-      // console.log(list);
-      this.setState({
-        dataSource: this.convertTreeDataResponse(list)
+    this.props
+      .onSearch(name, pageSize)
+      .then(list => {
+        // console.log(list);
+        this.setState({
+          dataSource: this.convertTreeDataResponse(list)
+        });
       });
-    });
   };
 
   render() {
