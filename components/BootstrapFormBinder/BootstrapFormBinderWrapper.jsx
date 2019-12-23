@@ -6,14 +6,21 @@ import {
   FormError as IceFormError
 } from "@icedesign/form-binder";
 
-import "./IceForm.scss";
+import "./BootstrapFormBinderWrapper.scss";
 
 const { Col, Row } = Grid;
 
-export default function IceForm(props) {
+export default function BootstrapFormBinderWrapper(props) {
   const { value, fields } = props;
 
+  // console.log(value);
+
   const [formValue, setFormValue] = useState(value);
+
+  // useEffect(() => {
+  //   // setFormValue(formValue);
+  //   console.log("123");
+  // }, [formValue]);
 
   function getDisplayName(field) {
     return field.displayName || field.name;
@@ -49,6 +56,14 @@ export default function IceForm(props) {
   function generateRow(field) {
     // console.log("regenerate rows: ", formValue);
     // todo: showIf not working
+    console.log(formValue, field.showIf && field.showIf(formValue));
+    const formBinderProps = {
+      name: field.name,
+      required: field.required || false,
+      message: generateMessage(field),
+      ...(field.formBinderProps || {})
+    };
+    const FormBinder = field.FormBinder || IceFormBinder;
     return (
       (!field.showIf || field.showIf(formValue)) && (
         <Row className="item">
@@ -71,14 +86,9 @@ export default function IceForm(props) {
                 {generateLabelTrailingIcon(field)}&emsp;
               </Col>
               <Col span={props.valueSpan == undefined ? 16 : props.valueSpan}>
-                <IceFormBinder
-                  name={field.name}
-                  required={field.required || false}
-                  message={generateMessage(field)}
-                  {...(field.formBinderProps || {})}
-                >
+                <FormBinder {...formBinderProps}>
                   {field.formComponent}
-                </IceFormBinder>
+                </FormBinder>
               </Col>
             </Row>
             <Row className="error">
@@ -105,8 +115,8 @@ export default function IceForm(props) {
   props.submitRef(submit);
 
   function onChange() {
-    // console.log(`onChange: `, formValue, setFormValue);
-    setFormValue(formValue);
+    // console.log(`onChange: `, formValue);
+    setFormValue({ ...formValue });
     props.onChange && props.onChange(formValue);
   }
 
@@ -115,7 +125,7 @@ export default function IceForm(props) {
   // console.log("render");
 
   return (
-    <div className="ice-form">
+    <div className="bootstrap-form-binder-wrapper">
       <IceFormBinderWrapper
         value={formValue}
         ref={f => (form = f)}
@@ -127,18 +137,28 @@ export default function IceForm(props) {
   );
 }
 
-IceForm.dialog = function(props) {
+BootstrapFormBinderWrapper.dialog = function(props) {
   const {
     iceDialogMethod,
     shouldUpdatePosition,
     closeable,
+    fields,
+    value,
     ...otherProps
   } = props;
 
   let sw;
 
   Dialog[iceDialogMethod || "show"]({
-    content: <IceForm {...otherProps} submitRef={s => (sw = s)} />,
+    style: { maxHeight: "auto" },
+    content: (
+      <BootstrapFormBinderWrapper
+        {...otherProps}
+        fields={fields}
+        value={value}
+        submitRef={s => (sw = s)}
+      />
+    ),
     onOk: () =>
       new Promise((resolve, reject) => {
         sw(resolve, reject);

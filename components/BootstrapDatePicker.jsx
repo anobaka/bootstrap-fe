@@ -42,13 +42,13 @@ const dateMethodKeys = {
 };
 
 export default function BootstrapDatePicker(props) {
-  const { range } = props;
-
+  const { disabledDate: _, min, max, onChange, ...otherProps } = props;
+  
   let disabledDate;
 
-  if (range && range.length > 0) {
-    const minDate = range[0] && parse(range[0]);
-    const maxDate = range[1] && parse(range[1]);
+  if (min || max) {
+    const minDate = min && parse(min);
+    const maxDate = max && parse(max);
 
     // console.log(minDate, maxDate);
 
@@ -66,8 +66,6 @@ export default function BootstrapDatePicker(props) {
       };
     }
   }
-
-  const { disabledDate: _, onChange, ...otherProps } = props;
 
   // console.log(disabledDate)
 
@@ -83,13 +81,13 @@ export default function BootstrapDatePicker(props) {
 }
 
 BootstrapDatePicker.RangePicker = function(props) {
-  const { range } = props;
+  const { disabledDate: _, min, max, onChange, ...otherProps } = props;
 
   let disabledDate;
 
-  if (range && range.length > 0) {
-    const minDate = range[0] && parse(range[0]);
-    const maxDate = range[1] && parse(range[1]);
+  if (min || max) {
+    const minDate = min && parse(min);
+    const maxDate = max && parse(max);
 
     // console.log(minDate, maxDate);
 
@@ -108,7 +106,6 @@ BootstrapDatePicker.RangePicker = function(props) {
     }
   }
 
-  const { disabledDate: _, onChange, ...otherProps } = props;
   return (
     <DatePicker.RangePicker
       {...otherProps}

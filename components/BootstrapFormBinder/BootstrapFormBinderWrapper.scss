@@ -1,4 +1,4 @@
-.ice-form {
+.bootstrap-form-binder-wrapper {
   font-size: 14px;
   .item {
     .label-value {
@@ -15,7 +15,8 @@
         }
       }
     }
-
-    margin-bottom: 15px;
+    .error {
+      min-height: 16px;
+    }
   }
 }
