@@ -43,7 +43,7 @@ const dateMethodKeys = {
 
 export default function BootstrapDatePicker(props) {
   const { disabledDate: _, min, max, onChange, ...otherProps } = props;
-  
+
   let disabledDate;
 
   if (min || max) {
@@ -74,6 +74,7 @@ export default function BootstrapDatePicker(props) {
       onChange={m =>
         onChange((moment.isMoment(m) && m.format("YYYY-MM-DD HH:mm:ss")) || m)
       }
+      defaultValue={moment()}
       {...otherProps}
       disabledDate={disabledDate}
     />
