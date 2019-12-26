@@ -13,8 +13,6 @@ const { Col, Row } = Grid;
 export default function BootstrapFormBinderWrapper(props) {
   const { value, fields } = props;
 
-  // console.log(value);
-
   const [formValue, setFormValue] = useState(value);
 
   // useEffect(() => {
@@ -56,7 +54,7 @@ export default function BootstrapFormBinderWrapper(props) {
   function generateRow(field) {
     // console.log("regenerate rows: ", formValue);
     // todo: showIf not working
-    console.log(formValue, field.showIf && field.showIf(formValue));
+    // console.log(formValue, field.showIf && field.showIf(formValue));
     const formBinderProps = {
       name: field.name,
       required: field.required || false,
@@ -92,7 +90,9 @@ export default function BootstrapFormBinderWrapper(props) {
               </Col>
             </Row>
             <Row className="error">
-              <Col offset="8">{generateFormError(field)}</Col>
+              <Col offset={props.labelSpan == undefined ? 8 : props.labelSpan}>
+                {generateFormError(field)}
+              </Col>
             </Row>
           </Col>
         </Row>
@@ -104,7 +104,7 @@ export default function BootstrapFormBinderWrapper(props) {
     form.validateAll((errors, values) => {
       console.log("errors", errors, "values", values);
       if (!errors) {
-        props.submit(value, resolve, reject);
+        props.submit(formValue, resolve, reject);
       } else {
         props.onError && props.onError(values, value);
         reject && reject();
@@ -143,7 +143,6 @@ BootstrapFormBinderWrapper.dialog = function(props) {
     shouldUpdatePosition,
     closeable,
     fields,
-    value,
     ...otherProps
   } = props;
 
@@ -155,7 +154,6 @@ BootstrapFormBinderWrapper.dialog = function(props) {
       <BootstrapFormBinderWrapper
         {...otherProps}
         fields={fields}
-        value={value}
         submitRef={s => (sw = s)}
       />
     ),

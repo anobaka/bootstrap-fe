@@ -4,7 +4,6 @@ import { Dialog, Button } from "@alifd/next";
 import BootstrapFormBinderWrapper from "../../components/BootstrapFormBinder/BootstrapFormBinderWrapper";
 
 function submit(value, resolve, reject, api, requestModel, onSuccess, onFail) {
-  // console.log(value);
   api(requestModel(value)).invoke(t => {
     if (t.code) {
       reject();
