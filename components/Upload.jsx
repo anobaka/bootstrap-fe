@@ -14,7 +14,7 @@ export default class Upload extends Component {
       url = url.substring(0, questionMarkIndex);
     }
     const filename = path.basename(url);
-    return {
+    let value = {
       name: filename,
       fileName: filename,
       state: "done",
@@ -23,6 +23,11 @@ export default class Upload extends Component {
       imgURL: url,
       url
     };
+    const { chainIceValue } = this.props;
+    if (chainIceValue) {
+      value = chainIceValue(value);
+    }
+    return value;
   };
 
   uploadFormatter = rsp => {
@@ -63,6 +68,7 @@ export default class Upload extends Component {
       IceComponent,
       name,
       listType,
+      chainIceValue,
       ...props
     } = this.props;
 
@@ -86,6 +92,8 @@ export default class Upload extends Component {
     };
 
     const RealComponent = IceComponent || IceUpload.Card;
+
+    // console.log(mergedProps)
 
     return (
       <RealComponent {...mergedProps}>

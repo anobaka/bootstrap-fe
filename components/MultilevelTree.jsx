@@ -287,7 +287,7 @@ export default class MultilevelTree extends Component {
             minWidth: 800
           },
           closeable: true,
-          footer: (
+          footer: this.props.formFooter === true ? (
             <div>
               <Button type="primary" onClick={() => this.submitForm(node)}>
                 确定
@@ -301,7 +301,7 @@ export default class MultilevelTree extends Component {
                 删除
               </Button>
             </div>
-          )
+          ) : this.props.formFooter === false ? false : this.props.formFooter
         });
         // console.log(this.dialog)
       }
