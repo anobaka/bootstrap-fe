@@ -1,15 +1,16 @@
 const swaggerGen = require("./swagger-gen");
 const fs = require("fs");
-const http = require("http");
 const path = require("path");
-// const https = require('https');
 
 function generateSdk(swaggerJsonUrl, outputDir) {
   console.log(`Generating SDK: ${swaggerJsonUrl}`);
   // console.log(`outputFile: ${outputFile}`);
   // const dir = outputFile.substring(0, outputFile.lastIndexOf(path.sep) + 1);
   // console.log(`dir: ${dir}`)
-  const requestInvoker = http;
+  const requestInvokerLibrary = swaggerJsonUrl.startsWith("https")
+    ? "https"
+    : "http";
+  const requestInvoker = require(requestInvokerLibrary);
   requestInvoker.get(swaggerJsonUrl, response => {
     const jsonFilename = path.join(outputDir, "./swagger.json");
     const file = fs.createWriteStream(jsonFilename);
