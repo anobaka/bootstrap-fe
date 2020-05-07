@@ -1,13 +1,17 @@
-const swaggerGen = require("./swagger-gen"), fs = require("fs"), http = require("http"), https = require("https"), path = require("path");
-// const https = require('https');
+const swaggerGen = require("./swagger-gen"),
+  fs = require("fs"),
+  http = require("http"),
+  https = require("https"),
+  path = require("path");
 
+// This method will be refactoring.
 function generateSdk(swaggerJsonUrl, outputDir) {
   console.log(`Generating SDK: ${swaggerJsonUrl}`);
   // console.log(`outputFile: ${outputFile}`);
   // const dir = outputFile.substring(0, outputFile.lastIndexOf(path.sep) + 1);
   // console.log(`dir: ${dir}`)
   const requestInvoker = swaggerJsonUrl.startsWith("https") ? https : http;
-  requestInvoker.get(swaggerJsonUrl, response => {
+  requestInvoker.get(swaggerJsonUrl, (response) => {
     const jsonFilename = path.join(outputDir, "./swagger.json");
     const file = fs.createWriteStream(jsonFilename);
     const stream = response.pipe(file);
@@ -17,10 +21,10 @@ function generateSdk(swaggerJsonUrl, outputDir) {
       const opt = {
         swagger: jsonData,
         moduleName: "api",
-        className: "api"
+        className: "api",
       };
       let outputs = swaggerGen(opt);
-      Object.keys(outputs).map(f => {
+      Object.keys(outputs).map((f) => {
         const o = outputs[f];
         const { override, data } = o;
         const filename = path.join(outputDir, f + ".js");
@@ -32,6 +36,17 @@ function generateSdk(swaggerJsonUrl, outputDir) {
       fs.unlinkSync(jsonFilename);
       console.log(`SDK generated: ${swaggerJsonUrl}`);
     });
+  });
+  const constantUrl = `${new URL(swaggerJsonUrl).origin}/api/constant`;
+  requestInvoker.get(constantUrl, (response) => {
+    if (response.statusCode == 200) {
+      const jsonFilename = path.join(outputDir, "./constants.ts");
+      const file = fs.createWriteStream(jsonFilename);
+      const stream = response.pipe(file);
+      stream.on("finish", () => {
+        console.log(`Constants generated: ${constantUrl}`);
+      });
+    }
   });
 }
 
