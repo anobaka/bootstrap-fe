@@ -16,6 +16,7 @@
     "@alifd/next": "^1.16.4",
     "@icedesign/container": "^1.0.4",
     "@icedesign/data-binder": "^1.0.5",
+    "@icedesign/form-binder": "^1.0.7",
     "lodash": "^4.17.15",
     "react": "^16.8.6",
     "react-router": "^5.0.1",

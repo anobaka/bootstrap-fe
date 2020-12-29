@@ -21,3 +21,9 @@ export const formatDate = (date, fmt) => {
       );
   return fmt;
 }
+
+Date.prototype.addDays = function(days) {
+  const d = new Date(this);
+  d.setDate(d.getDate() + parseInt(days));
+  return d;
+}

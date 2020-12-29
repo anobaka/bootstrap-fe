@@ -1,0 +1,22 @@
+.bootstrap-form-binder-wrapper {
+  font-size: 14px;
+  .item {
+    .label-value {
+      display: flex;
+      align-items: center;
+      .label {
+        text-align: right;
+        .tip {
+          margin-left: 2px;
+        }
+        .required {
+          margin-left: 2px;
+          color: red;
+        }
+      }
+    }
+    .error {
+      min-height: 16px;
+    }
+  }
+}

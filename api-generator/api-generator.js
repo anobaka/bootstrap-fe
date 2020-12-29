@@ -10,7 +10,7 @@ function generateSdk(swaggerJsonUrl, outputDir) {
   // console.log(`outputFile: ${outputFile}`);
   // const dir = outputFile.substring(0, outputFile.lastIndexOf(path.sep) + 1);
   // console.log(`dir: ${dir}`)
-  const requestInvoker = swaggerJsonUrl.startsWith("https") ? https : http;
+  const requestInvoker = swaggerJsonUrl.startsWith("http://") ? http : https;
   requestInvoker.get(swaggerJsonUrl, (response) => {
     const jsonFilename = path.join(outputDir, "./swagger.json");
     const file = fs.createWriteStream(jsonFilename);
