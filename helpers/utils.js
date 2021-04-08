@@ -1,7 +1,21 @@
-export function uuidv4() {
+import { useEffect, useRef } from "react";
+
+export const uuidv4 = () => {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    let r = (Math.random() * 16) | 0,
-      v = c == 'x' ? r : (r & 0x3) | 0x8;
+    const r = (Math.random() * 16) | 0;
+    const v = c == 'x' ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
-}
+};
+
+export const sleep = (ms) => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+};
+
+export const usePrevious = (value) => {
+  const ref = useRef();
+  useEffect(() => {
+    ref.current = value;
+  });
+  return ref.current;
+};
