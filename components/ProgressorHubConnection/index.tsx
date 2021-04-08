@@ -25,19 +25,20 @@ export default function useProgressorHubConnection({
 }) {
   const connection = useRef();
   const [connState, setConnState] = useState();
-  const prevConnState = usePrevious(connState);
-  const [state, setState] = useState();
+  const [state, setState] = useState({});
   const [progress, setProgress] = useState();
   const disposed = useRef(false);
 
   useEffect(() => {
-    if (prevConnState !== undefined && prevConnState !== connState) {
+    if (connState !== undefined) {
       onConnStateChange(connState);
     }
   }, [connState]);
 
   useEffect(() => {
-    onStateChange(state);
+    if (state !== undefined) {
+      onStateChange(state);
+    }
   }, [state]);
 
   useEffect(() => {

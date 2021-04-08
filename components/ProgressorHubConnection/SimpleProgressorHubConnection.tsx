@@ -3,6 +3,24 @@ import { HubConnectionState } from "@microsoft/signalr";
 import { Dialog, Message } from "@alifd/next";
 import useProgressorHubConnection from "./index";
 
+const styles = {
+  dialog: {
+    item: {
+      display: 'flex',
+      margin: 10,
+      fontSize: 18
+    },
+    key: {
+      width: 100,
+      textAlign: 'center',
+      fontWeight: 'bold'
+    },
+    value: {
+      width: 400
+    }
+  }
+}
+
 export default function useSimpleProgressorHubConnection({
   key, url, onStateChange = (s) => { }, onProgressChange = (p) => { },
 }) {
@@ -15,6 +33,17 @@ export default function useSimpleProgressorHubConnection({
     }
     const options = {
       title: state,
+      content: <>
+        <div style={styles.dialog.item}>
+          <div style={styles.dialog.key}>Key</div>
+          <div style={styles.dialog.value}>{key}</div>
+        </div>
+        <div style={styles.dialog.item}>
+          <div style={styles.dialog.key}>Url</div>
+          <div style={styles.dialog.value}>{url}</div>
+        </div>
+      </>,
+      footer: false,
       hasMask: false,
     };
     switch (state) {
@@ -22,7 +51,7 @@ export default function useSimpleProgressorHubConnection({
     case HubConnectionState.Connecting:
     case HubConnectionState.Disconnecting:
     case HubConnectionState.Reconnecting:
-      Dialog.show(options);
+      dialog.current = Dialog.show(options);
       break;
     case HubConnectionState.Connected:
       Message.success(`Progressor [${key}] connected to ${url} successfully.`);
