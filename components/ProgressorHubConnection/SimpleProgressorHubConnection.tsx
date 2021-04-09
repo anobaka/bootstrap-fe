@@ -1,25 +1,29 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { HubConnectionState } from "@microsoft/signalr";
-import { Dialog, Message } from "@alifd/next";
+import { Button, Dialog, Message } from "@alifd/next";
 import useProgressorHubConnection from "./index";
 
 const styles = {
   dialog: {
+    title: {
+      fontWeight: 'bold',
+      fontSize: 20,
+    },
     item: {
       display: 'flex',
       margin: 10,
-      fontSize: 18
+      fontSize: 18,
     },
     key: {
       width: 100,
       textAlign: 'center',
-      fontWeight: 'bold'
+      fontWeight: 'bold',
     },
     value: {
-      width: 400
-    }
-  }
-}
+      width: 400,
+    },
+  },
+};
 
 export default function useSimpleProgressorHubConnection({
   key, url, onStateChange = (s) => { }, onProgressChange = (p) => { },
@@ -43,14 +47,16 @@ export default function useSimpleProgressorHubConnection({
           <div style={styles.dialog.value}>{url}</div>
         </div>
       </>,
-      footer: false,
+      footer: <Button type="normal" onClick={() => { dialog.current.hide(); }}>Hide</Button>,
       hasMask: false,
     };
     switch (state) {
     case HubConnectionState.Disconnected:
+      options.title = HubConnectionState.Connecting;
     case HubConnectionState.Connecting:
     case HubConnectionState.Disconnecting:
     case HubConnectionState.Reconnecting:
+      options.title = <div style={styles.dialog.title}>{options.title}</div>;
       dialog.current = Dialog.show(options);
       break;
     case HubConnectionState.Connected:
