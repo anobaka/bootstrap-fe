@@ -9,7 +9,8 @@ enum ProgressorClientAction {
 
 enum ProgressorSignalRClientMethod {
     State = "State",
-    Progress = "Progress"
+    Progress = "Progress",
+    NotRegistered = 'NotRegistered'
 }
 
 enum ProgressorSignalRServerMethod {
@@ -39,6 +40,7 @@ type IHubConnectionStateOptions<TProgress extends IProgressorProgress> = {
     onConnectionStateChange: (state: HubConnectionState) => void,
     onStateChange: (state: IProgressorState) => void,
     onProgressChange: (progress: TProgress) => void
+    onFatalError: (code: number, msg: string) => void
 }
 
 class ProgressorHubConnection<TProgress extends IProgressorProgress> {
@@ -54,6 +56,7 @@ class ProgressorHubConnection<TProgress extends IProgressorProgress> {
     private readonly onConnectionStateChange: (state: HubConnectionState) => void;
     private readonly onStateChange: (state: IProgressorState) => void;
     private readonly onProgressChange: (state: TProgress) => void;
+    private readonly onFatalError: (code: number, msg: string) => void;
 
     private _log = (...args) => {
         console.log(`[Progressor:${this._id}]`, ...args);
@@ -113,6 +116,11 @@ class ProgressorHubConnection<TProgress extends IProgressorProgress> {
                         this.onProgressChange(varProgress);
                     }
                 },
+                [ProgressorSignalRClientMethod.NotRegistered]: (varKey, varMessage) => {
+                    if (varKey === this._id) {
+                        this.onFatalError(-1, varMessage);
+                    }
+                }
             };
 
             const self = this;
@@ -149,6 +157,7 @@ class ProgressorHubConnection<TProgress extends IProgressorProgress> {
         this.onConnectionStateChange = options.onConnectionStateChange
         this.onStateChange = options.onStateChange
         this.onProgressChange = options.onProgressChange
+        this.onFatalError = options.onFatalError
     }
 }
 
