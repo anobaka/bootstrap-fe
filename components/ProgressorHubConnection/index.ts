@@ -117,7 +117,7 @@ class ProgressorHubConnection<TProgress extends IProgressorProgress> {
                     }
                 },
                 [ProgressorSignalRClientMethod.NotRegistered]: (varKey, varMessage) => {
-                    if (varKey === this._id) {
+                    if (varKey == this._id) {
                         this.onFatalError(-1, varMessage);
                     }
                 }
