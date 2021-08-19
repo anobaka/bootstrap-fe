@@ -24,19 +24,7 @@
     "react-router-dom": "^5.0.1"
   },
   "devDependencies": {
-    "babel-eslint": "^10.0.2",
-    "cross-env": "^5.2.0",
-    "eslint": "^6.1.0",
-    "eslint-config-airbnb": "^17.1.1",
-    "eslint-plugin-babel": "^5.3.0",
-    "eslint-plugin-import": "^2.18.2",
-    "eslint-plugin-jsx-a11y": "^6.2.3",
-    "eslint-plugin-react": "^7.14.3",
-    "swagger-vue": "^1.0.3",
-    "eslint-plugin-node": "^11.1.0"
-  },
-  "scripts": {
-    "gen-sdk": "node ./src/apis/apiGenerator"
+    "swagger-vue": "^1.0.3"
   },
   "title": "abf"
 }
