@@ -23,10 +23,10 @@ export default class MultilevelSelector extends Component {
 
   getInitDataSource = (value) => {
     this.initialized = true;
-    console.log('Initializing multilevel selector data source');
+    // console.log('Initializing multilevel selector data source');
     this.props.getInitDataSource(value).then((list) => {
       const ds = this.convertTreeDataResponse(list);
-      console.log('Multilevel selector data source initialized: ', ds);
+      // console.log('Multilevel selector data source initialized: ', ds);
       this.setState({
         dataSource: ds,
         value,
@@ -64,7 +64,7 @@ export default class MultilevelSelector extends Component {
   };
 
   componentWillReceiveProps(props) {
-    console.log('name: ', props.name, ', new props: ', props.value, ', old props: ', this.props.value, ', initialized: ', this.initialized);
+    // console.log('name: ', props.name, ', new props: ', props.value, ', old props: ', this.props.value, ', initialized: ', this.initialized);
     if (props.value != this.state.value) {
       if (this.initialized) {
         this.setState({ value: props.value });
@@ -93,7 +93,7 @@ export default class MultilevelSelector extends Component {
       ...otherProps
     } = this.props;
 
-    console.log(this.state.value);
+    // console.log(this.state.value);
 
     return (
       <CascaderSelect
