@@ -7,39 +7,43 @@ export default class MultilevelSelector extends Component {
     super(props);
 
     this.state = {
-      dataSource: []
+      dataSource: [],
+      value: props.value,
     };
   }
 
   componentDidMount() {
-    const v = this.getValue();
-    if ((Array.isArray(v) && v.length > 0) || v) {
-      this.getInitDataSource(this.props.value);
+    const { value } = this.state;
+    if ((Array.isArray(value) && value.length > 0) || value > 0) {
+      this.getInitDataSource(value);
     }
   }
 
-  convertTreeDataResponse = v =>
-    (this.props.convertTreeDataResponse || convertTreeDataResponse)(v);
+  convertTreeDataResponse = v => (this.props.convertTreeDataResponse || convertTreeDataResponse)(v);
 
-  getInitDataSource = value => {
+  getInitDataSource = (value) => {
     this.initialized = true;
-    this.props.getInitDataSource(value).then(list => {
+    // console.log('Initializing multilevel selector data source');
+    this.props.getInitDataSource(value).then((list) => {
+      const ds = this.convertTreeDataResponse(list);
+      // console.log('Multilevel selector data source initialized: ', ds);
       this.setState({
-        dataSource: this.convertTreeDataResponse(list)
+        dataSource: ds,
+        value,
       });
     });
   };
 
-  getNextLevelDataList = data => {
-    return new Promise(resolve => {
+  getNextLevelDataList = (data) => {
+    return new Promise((resolve) => {
       const { dataSource } = this.state;
       const item = findItemByPos(dataSource, data.pos);
       if (!item.isLeaf && (!item.children || item.children.length == 0)) {
-        this.props.getNextLevelDataList(data.value).then(list => {
+        this.props.getNextLevelDataList(data.value).then((list) => {
           item.children = this.convertTreeDataResponse(list);
           this.setState(
             {
-              dataSource
+              dataSource,
             },
             resolve
           );
@@ -52,34 +56,29 @@ export default class MultilevelSelector extends Component {
 
   handleChange = (value, data, extra) => {
     // console.log(value);
-    this.props.onChange(value);
+    this.setState({
+      value,
+    }, () => {
+      this.props.onChange(value);
+    });
   };
 
   componentWillReceiveProps(props) {
     // console.log('name: ', props.name, ', new props: ', props.value, ', old props: ', this.props.value, ', initialized: ', this.initialized);
-    if (!this.props.value && props.value && !this.initialized) {
-      this.getInitDataSource(props.value);
+    if (props.value != this.state.value) {
+      if (this.initialized) {
+        this.setState({ value: props.value });
+      } else {
+        this.getInitDataSource(props.value);
+      }
     }
   }
 
-  onVisibleChange = visible => {
+  onVisibleChange = (visible) => {
     if (visible && !this.initialized) {
-      this.getInitDataSource(this.props.value);
+      this.getInitDataSource(this.state.value);
     }
     this.props.onVisibleChange && this.props.onVisibleChange(visible);
-  };
-
-  getValue = () => {
-    const { value } = this.props;
-    let v = value;
-    if (v != undefined) {
-      if (this.props.multiple) {
-        v = v.map(v => v.toString());
-      } else {
-        v = v.toString();
-      }
-    }
-    return v;
   };
 
   render() {
@@ -87,19 +86,19 @@ export default class MultilevelSelector extends Component {
     const {
       getInitDataSource,
       getNextLevelDataList,
-      value,
       convertTreeDataResponse,
       onChange,
       onVisibleChange,
-      ...props
+      value,
+      ...otherProps
     } = this.props;
 
-    const v = this.getValue();
+    // console.log(this.state.value);
 
     return (
       <CascaderSelect
-        {...props}
-        value={v}
+        {...otherProps}
+        value={this.state.value}
         dataSource={dataSource}
         loadData={this.getNextLevelDataList}
         onChange={this.handleChange}
