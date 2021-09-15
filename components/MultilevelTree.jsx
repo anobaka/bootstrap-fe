@@ -163,7 +163,7 @@ export default class MultilevelTree extends Component {
       var d = {
         key: a.id.toString(),
         label: this.renderLabel(a),
-        isLeaf: a.isLeaf,
+        isLeaf: false,
         data: a
       };
       this.populateChildren(d, a.children);
