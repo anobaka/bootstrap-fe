@@ -8,9 +8,9 @@ enum ProgressorClientAction {
 }
 
 enum ProgressorSignalRClientMethod {
-    State = "State",
-    Progress = "Progress",
-    NotRegistered = 'NotRegistered'
+    StateChanged = "StateChanged",
+    ProgressChanged = "ProgressChanged",
+    ErrorOccurred = 'ErrorOccurred'
 }
 
 enum ProgressorSignalRServerMethod {
@@ -76,7 +76,6 @@ class ProgressorHubConnection<TProgress extends IProgressorProgress> {
                         .then(() => {
                             conn.invoke(ProgressorSignalRServerMethod.Invoke, this._id, ProgressorClientAction.Initialize, null);
                         });
-                    // break;
                 } catch (e) {
                     console.log(e);
                 }
@@ -104,19 +103,19 @@ class ProgressorHubConnection<TProgress extends IProgressorProgress> {
             });
 
             const methods = {
-                [ProgressorSignalRClientMethod.State]: (varKey, varState) => {
+                [ProgressorSignalRClientMethod.StateChanged]: (varKey, varState) => {
                     if (varKey === this._id) {
                         this.state = varState;
                         this.onStateChange(varState);
                     }
                 },
-                [ProgressorSignalRClientMethod.Progress]: (varKey, varProgress) => {
+                [ProgressorSignalRClientMethod.ProgressChanged]: (varKey, varProgress) => {
                     if (varKey === this._id) {
                         this.progress = varProgress;
                         this.onProgressChange(varProgress);
                     }
                 },
-                [ProgressorSignalRClientMethod.NotRegistered]: (varKey, varMessage) => {
+                [ProgressorSignalRClientMethod.ErrorOccurred]: (varKey, varMessage) => {
                     if (varKey == this._id) {
                         this.onFatalError(-1, varMessage);
                     }
@@ -126,7 +125,7 @@ class ProgressorHubConnection<TProgress extends IProgressorProgress> {
             const self = this;
 
             Object.keys(methods).map(t => conn.on(t, function () {
-                self._log(`${t}: `, ...arguments);
+                // self._log(`${t}: `, ...arguments);
                 methods[t](...arguments);
             }));
 
@@ -136,6 +135,7 @@ class ProgressorHubConnection<TProgress extends IProgressorProgress> {
 
     public dispose = async () => {
         if (this._conn) {
+            this._disposed = true;
             await this._conn.stop();
             this._log(`connection to hub: ${this._url} disposed`);
         }
@@ -148,7 +148,9 @@ class ProgressorHubConnection<TProgress extends IProgressorProgress> {
 
     public stop = async () => {
         this.connect();
-        await this._conn.send(ProgressorSignalRServerMethod.Invoke, this._id, ProgressorClientAction.Stop, undefined);
+        console.log(this._conn)
+        const aaa = await this._conn.send(ProgressorSignalRServerMethod.Invoke, this._id, ProgressorClientAction.Stop, undefined);
+        console.log('sended', aaa)
     }
 
     constructor(options: IHubConnectionStateOptions<TProgress>) {
